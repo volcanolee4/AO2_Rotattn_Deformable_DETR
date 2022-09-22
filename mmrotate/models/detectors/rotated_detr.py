@@ -28,7 +28,7 @@ class RotatedDETR(RotatedSingleStageDetector):
 
     # over-write `forward_dummy` because:
     # the forward of bbox_head requires img_metas
-    def rbox2result(self, bboxes, labels, num_classes):
+    def rbox2result(self, bboxes, labels, num_classes , list_index=None):
         """Convert detection results to a list of numpy arrays.
 
         Args:
@@ -45,8 +45,8 @@ class RotatedDETR(RotatedSingleStageDetector):
             if isinstance(bboxes, torch.Tensor):
                 bboxes = bboxes.detach().cpu().numpy()  # dets,rboxes[keep],scores_k[keep]
                 labels = labels.detach().cpu().numpy()
-
-            return [bboxes[labels == i, :] for i in range(num_classes)]
+                list_index = [list_index[labels == i] for i in range(num_classes)]
+            return [bboxes[labels == i, :] for i in range(num_classes)] , list_index
 
     def forward_dummy(self, img):
         """Used for computing network flops.
@@ -158,8 +158,13 @@ class RotatedDETR(RotatedSingleStageDetector):
         #     *outs, img_metas, rescale=rescale)
         # skip post-processing when exporting to ONNX
         bbox_results = [
-            self.rbox2result(det_bboxes, det_labels, self.bbox_head.num_classes)
-            for det_bboxes, det_labels in results_list]
-        return bbox_results
+            self.rbox2result(det_bboxes, det_labels, self.bbox_head.num_classes,index_list)
+            for det_bboxes, det_labels ,index_list in results_list]
+
+        lgth = len(bbox_results)
+        bbox_results_ = [bbox_results[i][0] for i in range(lgth)]
+        list_index = [bbox_results[i][1] for i in range(lgth)]
+
+        return bbox_results_,list_index
 
 

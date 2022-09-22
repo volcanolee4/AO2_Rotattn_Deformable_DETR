@@ -5,6 +5,7 @@ from mmdet.core.bbox.iou_calculators import bbox_overlaps
 from mmdet.core.bbox.transforms import bbox_cxcywh_to_xyxy, bbox_xyxy_to_cxcywh
 from .builder import ROTATED_MATCH_COST
 from mmcv.ops import box_iou_rotated
+from mmrotate.core.bbox.iou_calculators.rotate_iou2d_calculator import rbbox_overlaps
 # from mmrotate.models.losses.gaussian_dist_loss import xy_wh_r_2_xy_sigma, xy_stddev_pearson_2_xy_sigma
 # from mmdet.core.bbox.iou_calculators import gwd_loss
 def postprocess(distance, fun='log1p', tau=1.0):
@@ -163,7 +164,7 @@ class RotatedIoUCost:
             torch.Tensor: iou_cost value with weight
         """
         # overlaps: [num_bboxes, num_gt]
-        overlaps = box_iou_rotated(bboxes, gt_bboxes, mode=self.iou_mode, aligned=False)
+        overlaps = rbbox_overlaps(bboxes, gt_bboxes, mode=self.iou_mode, aligned=False)
         # The 1 is a constant that doesn't change the matching, so omitted.
         iou_cost = -overlaps
         return iou_cost * self.weight

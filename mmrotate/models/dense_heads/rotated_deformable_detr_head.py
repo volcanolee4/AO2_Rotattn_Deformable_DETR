@@ -262,7 +262,7 @@ class RotatedDeformableDETRHead(RotatedDETRHead):
 
         for lvl in range(hs.shape[0]):
             if lvl == 0:
-                reference = init_reference
+                reference = init_reference  #已经sigmoid可以直接用了
             else:
                 reference = inter_references[lvl - 1]
             reference = inverse_sigmoid(reference)
@@ -496,7 +496,7 @@ class RotatedDeformableDETRHead(RotatedDETRHead):
             bbox_pred[:, :4] /= bbox_pred[:, :4].new_tensor(scale_factor)
         det_bboxes = torch.cat((bbox_pred, scores.unsqueeze(1)), -1)
 
-        return det_bboxes, det_labels
+        return det_bboxes, det_labels , bbox_index
 
     def simple_test_bboxes(self, feats, img_metas, rescale=False):
         """Test det bboxes without test-time augmentation.

@@ -125,7 +125,7 @@ class Rotated_HungarianAssigner(BaseAssigner):
         # bboxes = bbox_cxcywh_to_xyxy(bbox_pred) * factor
         # iou_cost = self.iou_cost(bboxes, gt_bboxes)
         # iou_cost = rbbox_overlaps(bbox_pred, normalize_gt_rbboxes)
-        iou_cost = self.iou_cost(bbox_pred, normalize_gt_rbboxes)
+        iou_cost = self.iou_cost(torch.clone(bbox_pred).detach(), normalize_gt_rbboxes)
 
         cost = cls_cost + reg_cost + iou_cost
         # 3. do Hungarian matching on CPU using linear_sum_assignment

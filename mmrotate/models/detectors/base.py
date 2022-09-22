@@ -58,6 +58,11 @@ class RotatedBaseDetector(BaseDetector):
         Returns:
             img (torch.Tensor): Only if not `show` or `out_file`
         """
+        #####For Vis######
+        sample_points = kwargs['sample_points']
+        sample_points_rotated = kwargs['sample_points_rotated']
+        index_list = kwargs['index_list']
+        ################
         img = mmcv.imread(img)
         img = img.copy()
         if isinstance(result, tuple):
@@ -67,6 +72,10 @@ class RotatedBaseDetector(BaseDetector):
         else:
             bbox_result, segm_result = result, None
         bboxes = np.vstack(bbox_result)
+        #####For Vis######
+        index_list = [index_list[i].cpu().numpy().reshape(-1,1) for i in range(len(index_list))]
+        index = np.vstack(index_list)
+        #######################
         labels = [
             np.full(bbox.shape[0], i, dtype=np.int32)
             for i, bbox in enumerate(bbox_result)
@@ -99,7 +108,11 @@ class RotatedBaseDetector(BaseDetector):
             win_name=win_name,
             show=show,
             wait_time=wait_time,
-            out_file=out_file)
+            out_file=out_file,
+            sample_points=sample_points,
+            sample_points_rotated=sample_points_rotated,
+            index=index
+        )
 
         if not (show or out_file):
             return img

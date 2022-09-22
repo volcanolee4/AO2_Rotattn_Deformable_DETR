@@ -88,7 +88,12 @@ def imshow_det_rbboxes(img,
                        win_name='',
                        show=True,
                        wait_time=0,
-                       out_file=None):
+                       out_file=None,
+                       sample_points = None,
+                       sample_points_rotated = None,
+                       index = None,
+
+):
     """Draw bboxes and class labels (with scores) on an image.
 
     Args:
@@ -141,6 +146,11 @@ def imshow_det_rbboxes(img,
         inds = scores > score_thr
         bboxes = bboxes[inds, :]
         labels = labels[inds]
+        indexes = index[inds]
+        num_gt = labels.shape[0]
+        if sample_points is not None and num_gt!=0:
+            sample_points = sample_points[indexes,:].view(num_gt,-1,2)
+            sample_points_rotated = sample_points_rotated[indexes,:].view(num_gt,-1,2)
         if segms is not None:
             segms = segms[inds, ...]
 
@@ -171,7 +181,18 @@ def imshow_det_rbboxes(img,
         bbox_palette = palette_val(get_palette(bbox_color, max_label + 1))
         colors = [bbox_palette[label] for label in labels[:num_bboxes]]
         draw_rbboxes(ax, bboxes, colors, alpha=0.8, thickness=thickness)
+        ######################
+        if sample_points is not None and num_gt!=0:
+            # points = sample_points_rotated[3,:]
+            # points_x = points[:,0].cpu().numpy()
+            # points_y = points[:,1].cpu().numpy()
+            # plt.scatter(points_x, points_y, c=np.asarray([1] * 32))
+            for i , points in enumerate(sample_points_rotated):
+                points_x = points[:,0].cpu().numpy()
+                points_y = points[:,1].cpu().numpy()
+                plt.scatter(points_x,points_y,s=np.asarray([8]*32),c='red')
 
+        ######################
         horizontal_alignment = 'left'
         positions = bboxes[:, :2].astype(np.int32) + thickness
         areas = bboxes[:, 2] * bboxes[:, 3]
